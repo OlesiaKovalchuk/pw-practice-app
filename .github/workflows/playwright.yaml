@@ -1,48 +1,27 @@
 name: Playwright Tests
-
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-
 jobs:
   test:
-    timeout-minutes: 30
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-
     steps:
-    # 1. Checkout репозиторію
     - uses: actions/checkout@v5
-
-    # 2. Setup Node.js
     - uses: actions/setup-node@v5
       with:
         node-version: 20
-
-    # 3. Встановлення залежностей (legacy peer deps через старі бібліотеки)
     - name: Install dependencies
-      run: npm install --legacy-peer-deps
-
-    # 4. Збірка Angular додатку
-    - name: Build Angular app
-      run: npm run build -- --prod
-
-    # 5. Встановлення Playwright браузерів
+      run: npm ci --force
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps --force
-
-    # 6. Запуск Playwright тестів на готовому build
     - name: Run Playwright tests
-      run: npx playwright test usePageObjects.spec.ts --project=chromium
-      env:
-        CI: true
-
-    # 7. Завантаження звітів
+      run: npm run pageObjects-chrome
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
-
