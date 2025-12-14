@@ -1,24 +1,46 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
     steps:
+    # Крок 1: витягуємо репозиторій
     - uses: actions/checkout@v5
+
+    # Крок 2: встановлюємо Node.js
     - uses: actions/setup-node@v5
       with:
         node-version: 20
+
+    # Крок 3: встановлюємо залежності (включно з legacy peer deps)
     - name: Install dependencies
       run: npm install --legacy-peer-deps
+
+    # Крок 4: встановлюємо webpack явно, якщо він потрібен для Angular
+    - name: Ensure webpack is installed
+      run: npm install --legacy-peer-deps webpack webpack-cli --save-dev
+
+    # Крок 5: встановлюємо браузери для Playwright
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps --force
+
+    # Крок 6: запускаємо тести
     - name: Run Playwright tests
       run: npm run pageObjects-chrome
+
+    # Крок 7: переконуємося, що папка для звітів існує
+    - name: Ensure playwright-report exists
+      run: mkdir -p playwright-report
+
+    # Крок 8: завантажуємо артефакти
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
