@@ -1,24 +1,40 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v5
+
     - uses: actions/setup-node@v5
       with:
         node-version: 20
+
+    # Встановлюємо залежності
     - name: Install dependencies
       run: npm install --legacy-peer-deps
+
+    # Встановлюємо Playwright браузери
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps --force
+      run: npx playwright install --with-deps
+
+    # Встановлюємо webpack (щоб Angular dev server стартував)
+    - name: Install Webpack
+      run: npm install --save-dev webpack
+
+    # Запуск тестів
     - name: Run Playwright tests
-      run: npm run pageObjects-chrome
+      run: npx playwright test usePageObjects.spec.ts --project=chromium
+
+    # Завантаження звіту
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
